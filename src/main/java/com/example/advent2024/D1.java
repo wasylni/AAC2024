@@ -2,6 +2,7 @@ package com.example.advent2024;
 
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class D1 {
@@ -24,7 +25,24 @@ public class D1 {
         System.out.println("List 1: " + list1);
         System.out.println("List 2: " + list2);
 
-        return null;
+        Collections.sort(list1);
+        Collections.sort(list2);
+
+        // Print the two lists
+        System.out.println("List 1: " + list1);
+        System.out.println("List 2: " + list2);
+
+        // Iterate and calculate differences
+        System.out.println("Differences (list2 - list1):");
+        int result = 0;
+        for (int i = 0; i < list1.size(); i++) {
+            int difference = Math.abs(list2.get(i) - list1.get(i));
+            result = result + difference;
+            System.out.println("Index " + i + ": " + list2.get(i) + " - " + list1.get(i) + " = " + difference);
+        }
+
+        System.out.println("**** Result for D1 is " + result);
+        return result;
     }
 
 }

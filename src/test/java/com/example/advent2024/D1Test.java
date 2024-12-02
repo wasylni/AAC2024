@@ -10,11 +10,19 @@ class D1Test {
     @Test
     void calculate() {
         Integer result = new D1().calculate(testData);
-        Assertions.assertNull(result);
+        Assertions.assertEquals(11, result);
     }
 
 
-    String testData = "" +
+    String testData =
+            "3   4\n" +
+            "4   3\n" +
+            "2   5\n" +
+            "1   3\n" +
+            "3   9\n" +
+            "3   3";
+
+    String realData = "" +
             "66845   37619\n" +
             "94793   99076\n" +
             "76946   36179\n" +
@@ -1014,5 +1022,6 @@ class D1Test {
             "30895   46438\n" +
             "69966   25582\n" +
             "31783   85509\n" +
-            "97288   51968";
+            "97288   51968\n" +
+            "";
 }
