@@ -9,7 +9,12 @@ class D2Test {
     void testD2() {
         Integer result = D2.howManySafe(testInput);
         Assertions.assertEquals(2, result);
+    }
 
+    @Test
+    void testD2Case2() {
+        Integer result = D2.howManySafeIgnoreOne(testInput);
+        Assertions.assertEquals(4, result);
     }
 
     String testInput = "" +
