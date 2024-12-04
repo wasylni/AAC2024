@@ -11,6 +11,12 @@ class D4Test {
         Assertions.assertEquals(18, result);
     }
 
+    @Test
+    void findStringTask2Count() {
+        Integer result = new D4().traverseXmassTask2(testInput);
+        Assertions.assertEquals(9, result);
+    }
+
     String testInput = "" +
             "MMMSXXMASM\n" +
             "MSAMXMSMSA\n" +

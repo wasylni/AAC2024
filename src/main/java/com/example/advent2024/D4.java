@@ -2,6 +2,7 @@ package com.example.advent2024;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class D4 {
@@ -15,6 +16,48 @@ public class D4 {
         System.out.println(occurences);
         return occurences;
     }
+
+    public Integer traverseXmassTask2(String arginputs) {
+        Set<String> testPattern = Set.of("MMASS", "SSAMM", "MSAMS", "SMASM");
+
+        String[][] array = convertTo2dArray(arginputs);
+        List<String> result = traversArrayInSearchOfXmass(array, testPattern);
+        return result.size();
+    }
+
+    private List<String> traversArrayInSearchOfXmass(String[][] array, Set<String> pattern) {
+        List<String> allFound = new ArrayList<>();
+
+        for (int i = 0; i < array.length; i++) { // Outer loop for rows
+            for (int j = 0; j < array[i].length; j++) { // Inner loop for columns
+                StringBuilder sb = new StringBuilder();
+                try {
+                    // Access each element
+                    //first element of x
+                    String first = array[i][j];
+                    //second element of x
+                    String second = array[i][j + 2];
+                    //third element of x
+                    String third = array[i + 1][j + 1];
+                    //fourt element of x
+                    String fourth = array[i + 2][j];
+                    //fifth element of x
+                    String fifth = array[i + 2][j + 2];
+                    sb.append(first).append(second).append(third).append(fourth).append(fifth);
+                    String result = sb.toString();
+
+                    if (pattern.contains(result)) {
+                        allFound.add(result);
+                    }
+
+                } catch (Exception e) {
+                }
+            }
+        }
+        System.out.println(allFound);
+        return allFound;
+    }
+
 
     private int countOccurences(String search, List<String> result) {
         AtomicInteger resultCount = new AtomicInteger();
