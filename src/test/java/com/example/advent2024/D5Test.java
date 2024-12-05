@@ -15,7 +15,7 @@ class D5Test {
 
     @Test
     void getAllInOrderSumMiddleWithReorder() {
-        Integer result = new D5().getAllInOrderSumMiddleWithReorder(orderTest, pagesPrintedTest);
+        Integer result = new D5().getAllInOrderSumMiddleWithReorder(orderReal, pagesPrintedReal);
         Assertions.assertEquals(123, result);
     }
 
@@ -1227,7 +1227,7 @@ class D5Test {
             "24|42\n" +
             "21|27\n";
 
-    String pagesPrintedReal= "" +
+    String pagesPrintedReal=
             "87,86,37,91,36,95,89,67,21,23,27,48,55,18,13,49,43,72,24,98,94\n" +
             "79,16,83,58,33,35,29,52,45,61,17,54,41,12,26\n" +
             "74,49,31,72,95,27,44,23,91,89,98,67,94,18,48\n" +

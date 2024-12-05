@@ -1,5 +1,6 @@
 package com.example.advent2024;
 
+import org.apache.logging.log4j.internal.map.UnmodifiableArrayBackedMap;
 import org.yaml.snakeyaml.util.Tuple;
 
 import java.util.*;
@@ -43,13 +44,14 @@ public class D5 {
         });
 
         invalidList.forEach(pagePrintList -> {
-            if (verifyPagePrintListAndReorder(pagePrintList, order) != null) {
-                valid.add(pagePrintList);
+            List<Integer> corrected = new ArrayList<>(verifyPagePrintListAndReorder(pagePrintList, order));
+            if (corrected != null) {
+                valid.add(corrected);
             }
         });
 
 
-        invalidList.forEach(pageOrder -> {
+        valid.forEach(pageOrder -> {
             int middleIndex = pageOrder.size() / 2;
             result.set(result.get() + pageOrder.get(middleIndex));
         });
@@ -75,12 +77,14 @@ public class D5 {
         AtomicReference<List<Integer>> fixedList = new AtomicReference<>(new ArrayList<>(pagePrintList));
         int count = 0;
 
+        orderFailedRules(failedRulesList);
+
         failedRulesList.forEach(rule -> {
             List<Integer> list = new ArrayList<>(fixedList.get());
             fixedList.set(new ArrayList<>(reShuffle2(rule, list)));
         });
 
-        while (count < 5 && !failedRulesPass(failedRulesList, fixedList.get())) {
+        while (count < 500 && !failedRulesPass(failedRulesList, fixedList.get())) {
             System.out.println("***");
             System.out.println("***");
             System.out.println("***");
@@ -95,11 +99,15 @@ public class D5 {
         return fixedList.get();
     }
 
+    private void orderFailedRules(List<Tuple<Integer, Integer>> failedRulesList) {
+        failedRulesList.sort((t1, t2) -> t2._1().compareTo(t1._1()));
+    }
+
     private boolean failedRulesPass(List<Tuple<Integer, Integer>> failedRulesList, List<Integer> pagePrintList) {
         AtomicBoolean fixedList = new AtomicBoolean(true);
 
         failedRulesList.forEach(rule -> {
-            if(!checkRuleMet(rule, pagePrintList)){
+            if (!checkRuleMet(rule, pagePrintList)) {
                 fixedList.set(false);
             }
         });
@@ -108,7 +116,7 @@ public class D5 {
 
 
     private List<Integer> reShuffle2(Tuple<Integer, Integer> rule, List<Integer> fixedList) {
-        System.out.println("before: "+fixedList + " for rule:"+ rule._1() +"|"+ rule._2());
+        System.out.println("before: " + fixedList + " for rule:" + rule._1() + "|" + rule._2());
         List<Integer> specialNumbers = new ArrayList<>();
         List<Integer> otherNumbers = new ArrayList<>();
 
@@ -140,7 +148,7 @@ public class D5 {
             }
         }
 
-        System.out.println("after: "+result);
+        System.out.println("after: " + result);
         return result;
     }
 
