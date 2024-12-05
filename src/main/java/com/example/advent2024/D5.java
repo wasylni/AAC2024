@@ -3,6 +3,7 @@ package com.example.advent2024;
 import org.yaml.snakeyaml.util.Tuple;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -64,34 +65,83 @@ public class D5 {
                 }
         );
 
-        if (failedRulesList.size() > 0) {
+        if (!failedRulesList.isEmpty()) {
             return applyFailedRules(failedRulesList, pagePrintList);
         }
         return null;
     }
 
     private List<Integer> applyFailedRules(List<Tuple<Integer, Integer>> failedRulesList, List<Integer> pagePrintList) {
-        AtomicReference<List<Integer>> fixedList = new AtomicReference<>(new ArrayList<>());
+        AtomicReference<List<Integer>> fixedList = new AtomicReference<>(new ArrayList<>(pagePrintList));
+        int count = 0;
+
         failedRulesList.forEach(rule -> {
-            fixedList.set(reSuffle(rule, fixedList.get()));
+            List<Integer> list = new ArrayList<>(fixedList.get());
+            fixedList.set(new ArrayList<>(reShuffle2(rule, list)));
         });
+
+        while (count < 5 && !failedRulesPass(failedRulesList, fixedList.get())) {
+            System.out.println("***");
+            System.out.println("***");
+            System.out.println("***");
+            System.out.println("***");
+            failedRulesList.forEach(rule -> {
+                List<Integer> list = new ArrayList<>(fixedList.get());
+                fixedList.set(new ArrayList<>(reShuffle2(rule, list)));
+            });
+            count++;
+        }
 
         return fixedList.get();
     }
 
-    private List<Integer> reSuffle(Tuple<Integer, Integer> rule, List<Integer> fixedList) {
-        System.out.println("before: "+fixedList);
-        Comparator<Integer> customComparator = (a, b) -> {
-            if (a == rule._1()) return -1; // 97 always comes first
-            if (b == rule._1()) return 1;  // If comparing against 97, other numbers come after it
-            if (a == rule._2()) return 1;  // 75 always comes last
-            if (b == rule._2()) return -1; // If comparing against 75, other numbers come before it
-            return 0;               // Preserve relative order for other numbers
-        };
-        // Sort the list using the custom comparator
-        fixedList.sort(customComparator);
-        System.out.println("after: "+fixedList); // Output: [97, 47, 61, 53, 75]
-        return fixedList;
+    private boolean failedRulesPass(List<Tuple<Integer, Integer>> failedRulesList, List<Integer> pagePrintList) {
+        AtomicBoolean fixedList = new AtomicBoolean(true);
+
+        failedRulesList.forEach(rule -> {
+            if(!checkRuleMet(rule, pagePrintList)){
+                fixedList.set(false);
+            }
+        });
+        return fixedList.get();
+    }
+
+
+    private List<Integer> reShuffle2(Tuple<Integer, Integer> rule, List<Integer> fixedList) {
+        System.out.println("before: "+fixedList + " for rule:"+ rule._1() +"|"+ rule._2());
+        List<Integer> specialNumbers = new ArrayList<>();
+        List<Integer> otherNumbers = new ArrayList<>();
+
+
+        for (int num : fixedList) {
+            if (num == rule._1() || num == rule._2()) {
+                specialNumbers.add(num);
+            } else {
+                otherNumbers.add(num);
+            }
+        }
+
+        specialNumbers.sort((a, b) -> {
+            if (a == rule._1()) return -1;
+            if (b == rule._1()) return 1;
+            if (a == rule._2()) return 1;
+            if (b == rule._2()) return -1;
+            return 0;
+        });
+
+        // Merge back: insert specialNumbers into their original positions
+        List<Integer> result = new ArrayList<>();
+        Iterator<Integer> specialIterator = specialNumbers.iterator();
+        for (int num : fixedList) {
+            if (num == rule._1() || num == rule._2()) {
+                result.add(specialIterator.next());
+            } else {
+                result.add(num);
+            }
+        }
+
+        System.out.println("after: "+result);
+        return result;
     }
 
     private List<Integer> verifyPagePrintList(List<Integer> pagePrintList, List<Tuple<Integer, Integer>> order) {
