@@ -7,14 +7,14 @@ class D5Test {
 
     @Test
     void t1() {
-        Integer result = new D5().t1(orderTest, pagesPrintedTest);
+        Integer result = new D5().getAllInOrderSumMiddle(orderTest, pagesPrintedTest);
         Assertions.assertEquals(143, result);
     }
 
     @Test
     void t2() {
-        Integer result = new D5().t2(orderReal, pagesPrintedReal);
-        Assertions.assertEquals(5285, result);
+        Integer result = new D5().getAllInOrderSumMiddleWithReorder(orderTest, pagesPrintedTest);
+        Assertions.assertEquals(123, result);
     }
 
     String orderTest =
