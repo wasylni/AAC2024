@@ -13,19 +13,20 @@ public class D5 {
         List<Tuple<Integer, Integer>> order = findOrder(printOrder);
         List<List<Integer>> orderedPagesToCheck = getListOfOrdered(printState);
         List<List<Integer>> valid = new ArrayList<>();
-        AtomicInteger result = new AtomicInteger();
-
         orderedPagesToCheck.forEach(pagePrintList -> {
             if (verifyPagePrintList(pagePrintList, order) != null) {
                 valid.add(pagePrintList);
             }
         });
+        return calculateResult(valid);
+    }
 
+    private static Integer calculateResult(List<List<Integer>> valid) {
+        AtomicInteger result = new AtomicInteger();
         valid.forEach(pageOrder -> {
             int middleIndex = pageOrder.size() / 2;
             result.set(result.get() + pageOrder.get(middleIndex));
         });
-
         return result.get();
     }
 
@@ -34,7 +35,6 @@ public class D5 {
         List<List<Integer>> orderedPagesToCheck = getListOfOrdered(printState);
         List<List<Integer>> invalidList = new ArrayList<>();
         List<List<Integer>> valid = new ArrayList<>();
-        AtomicInteger result = new AtomicInteger();
 
         orderedPagesToCheck.forEach(pagePrintList -> {
             if (verifyPagePrintList(pagePrintList, order) == null) {
@@ -48,14 +48,8 @@ public class D5 {
                 valid.add(corrected);
             }
         });
+        return calculateResult(valid);
 
-
-        valid.forEach(pageOrder -> {
-            int middleIndex = pageOrder.size() / 2;
-            result.set(result.get() + pageOrder.get(middleIndex));
-        });
-
-        return result.get();
     }
 
     private List<Integer> verifyPagePrintListAndReorder(List<Integer> pagePrintList, List<Tuple<Integer, Integer>> order) {
@@ -111,7 +105,7 @@ public class D5 {
         failedRulesList.forEach(rule -> {
             if (!checkRuleMet(rule, pagePrintList)) {
                 fixedList.set(false);
-            }else{
+            } else {
                 failedRulesReevaluatedList.remove(rule);
             }
         });
@@ -119,7 +113,6 @@ public class D5 {
         failedRulesList = new ArrayList<>(failedRulesReevaluatedList);
         return fixedList.get();
     }
-
 
 
     private List<Integer> reShuffle2(Tuple<Integer, Integer> rule, List<Integer> fixedList) {
