@@ -3,20 +3,18 @@ package com.example.advent2024;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class D5Test {
 
     @Test
-    void getAllInOrderSumMiddle() {
-        Integer result = new D5().getAllInOrderSumMiddle(orderTest, pagesPrintedTest);
+    void t1() {
+        Integer result = new D5().t1(orderTest, pagesPrintedTest);
         Assertions.assertEquals(143, result);
     }
 
     @Test
-    void getAllInOrderSumMiddleWithReorder() {
-        Integer result = new D5().getAllInOrderSumMiddleWithReorder(orderReal, pagesPrintedReal);
-        Assertions.assertEquals(123, result);
+    void t2() {
+        Integer result = new D5().t2(orderReal, pagesPrintedReal);
+        Assertions.assertEquals(5285, result);
     }
 
     String orderTest =
