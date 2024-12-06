@@ -12,6 +12,7 @@ public class D5 {
     public Integer getAllInOrderSumMiddle(String printOrder, String printState) {
         List<Tuple<Integer, Integer>> order = findOrder(printOrder);
         List<List<Integer>> orderedPagesToCheck = getListOfOrdered(printState);
+
         List<List<Integer>> valid = new ArrayList<>();
         orderedPagesToCheck.forEach(pagePrintList -> {
             if (verifyPagePrintList(pagePrintList, order) != null) {
@@ -21,18 +22,12 @@ public class D5 {
         return calculateResult(valid);
     }
 
-    private static Integer calculateResult(List<List<Integer>> valid) {
-        AtomicInteger result = new AtomicInteger();
-        valid.forEach(pageOrder -> {
-            int middleIndex = pageOrder.size() / 2;
-            result.set(result.get() + pageOrder.get(middleIndex));
-        });
-        return result.get();
-    }
+
 
     public Integer getAllInOrderSumMiddleWithReorder(String printOrder, String printState) {
         List<Tuple<Integer, Integer>> order = findOrder(printOrder);
         List<List<Integer>> orderedPagesToCheck = getListOfOrdered(printState);
+
         List<List<Integer>> invalidList = new ArrayList<>();
         List<List<Integer>> valid = new ArrayList<>();
 
@@ -77,11 +72,7 @@ public class D5 {
             fixedList.set(new ArrayList<>(reShuffle2(rule, list)));
         });
 
-        while (count < 500 && !failedRulesPass(failedRulesList, fixedList.get())) {
-            System.out.println("***");
-            System.out.println("***" + count);
-            System.out.println("***");
-            System.out.println("***");
+        while (count < 10 && !failedRulesPass(failedRulesList, fixedList.get())) {
             failedRulesList.forEach(rule -> {
                 List<Integer> list = new ArrayList<>(fixedList.get());
                 fixedList.set(new ArrayList<>(reShuffle2(rule, list)));
@@ -94,8 +85,6 @@ public class D5 {
 
     private void orderFailedRules(List<Tuple<Integer, Integer>> failedRulesList) {
         failedRulesList.sort((t1, t2) -> t2._1().compareTo(t1._1()));
-        failedRulesList.sort((t1, t2) -> t2._2().compareTo(t1._2()));
-//        failedRulesList.sort((t1, t2) -> t2._1().compareTo(t1._1()));
     }
 
     private boolean failedRulesPass(List<Tuple<Integer, Integer>> failedRulesList, List<Integer> pagePrintList) {
@@ -229,6 +218,15 @@ public class D5 {
             pairsOfTp.add(tp);
         }
         return pairsOfTp;
+    }
+
+    private static Integer calculateResult(List<List<Integer>> valid) {
+        AtomicInteger result = new AtomicInteger();
+        valid.forEach(pageOrder -> {
+            int middleIndex = pageOrder.size() / 2;
+            result.set(result.get() + pageOrder.get(middleIndex));
+        });
+        return result.get();
     }
 
 

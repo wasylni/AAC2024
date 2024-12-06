@@ -17,6 +17,12 @@ class D5Test {
         Assertions.assertEquals(123, result);
     }
 
+//    @Test
+//    void t3() {
+//        Integer result = new D5().getAllInOrderSumMiddleWithReorder(orderReal, pagesPrintedReal);
+//        Assertions.assertEquals(5285, result);
+//    }
+
     String orderTest =
             "47|53\n" +
             "97|13\n" +
