@@ -17,9 +17,9 @@ public class D6 {
         while(proposedMove!=null && i<10000){
             i++;
             proposedMove = move(map, proposedMove);
+            printResultCalculatemoves(map);
         }
-        convertTo2dArray(arginputs);
-        return 0;
+        return printResultCalculatemoves(map);
     }
 
     Tuple<Integer, Integer> findGuard(String[][] map) {
@@ -34,6 +34,24 @@ public class D6 {
             }
         }
         return null;
+    }
+
+   int printResultCalculatemoves(String[][] map) {
+        int moves = 0;
+        // Traverse the map using enhanced for loop
+        for (int row = 0; row < map.length; row++) {
+            for (int col = 0; col < map[row].length; col++) {
+                if (!Objects.equals(map[row][col], ".") && !Objects.equals(map[row][col], "#") ) {
+                    moves++;
+                }
+                System.out.print(map[row][col]+" ");
+            }
+
+            System.out.println();
+        }
+       System.out.println(" ==============================                            ");
+       System.out.println(" ==============================                            ");
+        return moves;
     }
 
 
