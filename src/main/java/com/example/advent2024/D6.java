@@ -63,16 +63,17 @@ public class D6 {
 
     private void searchForLoops(Tuple<Integer, Integer> obstaclePositionCheck, Tuple<Integer, Integer> proposedMove, String[][] map) {
         int i = 0;
-        while(proposedMove !=null && i <1000){
+        while(proposedMove !=null && i <100000){
             i++;
             if(visitedWithCountTest.get(proposedMove)==null){
                 visitedWithCountTest.put(proposedMove, 1);
             }else{
                 int val = visitedWithCountTest.get(proposedMove)+1;
                 visitedWithCountTest.put(proposedMove, val);
-                if (val>1000){
+                if (val>100){
                     obstaclesPositionSuccesfull.add(obstaclePositionCheck);
                     visitedWithCountTest.clear();
+                    System.out.println("loop found "+ val + " : " + obstaclePositionCheck);
                     return;
                 }
             }
