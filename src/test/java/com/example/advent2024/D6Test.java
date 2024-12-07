@@ -15,9 +15,24 @@ class D6Test {
         Assertions.assertEquals(41, result);
 
     }
+
     @Test
     void t2() {
         Integer result = d6.t2(inputTest);
+        Assertions.assertEquals(6, result);
+
+    }
+
+    @Test
+    void tt1() {
+        Integer result = d6.t1(inputReal);
+        Assertions.assertEquals(4722, result);
+
+    }
+
+    @Test
+    void tt2() {
+        Integer result = d6.t2(inputReal);
         Assertions.assertEquals(6, result);
 
     }
