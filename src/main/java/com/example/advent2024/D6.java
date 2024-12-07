@@ -9,16 +9,15 @@ import com.example.advent2024.collection.Tuple;
 public class D6 {
 
     Set<Tuple<Integer, Integer>> visitedNodes = new HashSet<>();
-    Map<Tuple<Integer, Integer>, Integer> visitedWithCountTest = new HashMap();
+    Map<Tuple<Integer, Integer>, Integer> visitedWithCountTest = new HashMap<>();
     Set<Tuple<Integer, Integer>> obstaclesPositionSuccesfull = new HashSet<>();
 
     public Integer t1(String arginputs) {
         int i = 0;
         Tuple<Integer, Integer> proposedMove;
         String[][] map = convertTo2dArray(arginputs);
-        Tuple<Integer, Integer> guardInitPosition = findGuard(map);
-        proposedMove = guardInitPosition;
-        while(proposedMove!=null && i<1000000){
+        proposedMove = findGuard(map);
+        while(proposedMove!=null && i<100000){
             i++;
             proposedMove = move(map, proposedMove);
             printResultCalculatemoves(map);
@@ -28,38 +27,58 @@ public class D6 {
     }
 
     public Integer t2(String input) {
-
+        t1(input);
         String[][] map = convertTo2dArray(input);
+        String[][] mapOriginal = convertTo2dArray(input);
         Tuple<Integer, Integer> guardPosition = findGuard(map);
-        visitedNodes.remove(guardPosition);
-        HashSet<Tuple<Integer, Integer>> visitedWithCountCopy = new HashSet<>(visitedNodes);
 
-        visitedWithCountCopy.forEach(obstacle-> {
-            map[obstacle._1()][obstacle._2()]="O";
+        HashSet<Tuple<Integer, Integer>> visitedPoints = new HashSet<>();
+        visitedPointsMinusGuardInitialPosition(guardPosition, visitedPoints);
 
-            int i = 0;
-            Tuple<Integer, Integer> proposedMove = guardPosition;
-            while(proposedMove!=null && i<10000){
-                i++;
-                if(visitedWithCountTest.get(proposedMove)==null){
-                    visitedWithCountTest.put(proposedMove, 1);
-                }else{
-                    int val = visitedWithCountTest.get(proposedMove)+1;
-                    visitedWithCountTest.put(proposedMove, val);
-                    if (val>3){
-                        obstaclesPositionSuccesfull.add(obstacle);
-                        visitedWithCountTest.clear();
-                        break;
-                    }
-                }
-
-                proposedMove = move(map, proposedMove);
-                printResultCalculatemoves(map);
-            }
-            System.out.println(i+" *****");
+        visitedPoints.forEach(obstaclePosition-> {
+            resetMap(map, mapOriginal);
+            String previouslyInThatPoint = map[obstaclePosition._1()][obstaclePosition._2()];
+            map[obstaclePosition._1()][obstaclePosition._2()]="O";
+            searchForLoops(obstaclePosition, guardPosition, map);
+            map[obstaclePosition._1()][obstaclePosition._2()]=previouslyInThatPoint;
+//            System.out.println(i+" *****");
         });
-
         return obstaclesPositionSuccesfull.size();
+    }
+
+    private void resetMap(String[][] mapModified, String[][] mapBlueprint) {
+        for (int row = 0; row < mapBlueprint.length; row++) {
+            System.arraycopy(mapBlueprint[row], 0, mapModified[row], 0, mapBlueprint[row].length);
+        }
+    }
+
+    private void visitedPointsMinusGuardInitialPosition(Tuple<Integer, Integer> guardPosition, HashSet<Tuple<Integer, Integer>> visitedPoints) {
+        visitedNodes.forEach(n->{
+            if(!n.equals(guardPosition)){
+                visitedPoints.add(n);
+            }
+
+        });
+    }
+
+    private void searchForLoops(Tuple<Integer, Integer> obstaclePositionCheck, Tuple<Integer, Integer> proposedMove, String[][] map) {
+        int i = 0;
+        while(proposedMove !=null && i <1000){
+            i++;
+            if(visitedWithCountTest.get(proposedMove)==null){
+                visitedWithCountTest.put(proposedMove, 1);
+            }else{
+                int val = visitedWithCountTest.get(proposedMove)+1;
+                visitedWithCountTest.put(proposedMove, val);
+                if (val>1000){
+                    obstaclesPositionSuccesfull.add(obstaclePositionCheck);
+                    visitedWithCountTest.clear();
+                    return;
+                }
+            }
+            proposedMove = move(map, proposedMove);
+        }
+        System.out.println("asserting position obstacle "+ i + " : " + obstaclePositionCheck);
     }
 
     Tuple<Integer, Integer> findGuard(String[][] map) {
@@ -106,6 +125,7 @@ public class D6 {
             return null;
         }
         String directionIndicator = map[startPosition._1()][startPosition._2()];
+        printResultCalculatemoves(map);
         return moveGuard(directionIndicator, startPosition, map);
     }
 

@@ -15,7 +15,6 @@ class D6Test {
         Assertions.assertEquals(41, result);
 
     }
-
     @Test
     void t2() {
         Integer result = d6.t2(inputTest);
