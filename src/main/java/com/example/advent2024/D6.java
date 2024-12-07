@@ -3,13 +3,14 @@ package com.example.advent2024;
 
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.advent2024.collection.Tuple;
 
 public class D6 {
 
     Set<Tuple<Integer, Integer>> visitedNodes = new HashSet<>();
-    Map<Tuple<Integer, Integer>, Integer> visitedWithCountTest = new HashMap<>();
+    Map<Tuple<Integer, Integer>, Integer> positionAlreadyVisited = new HashMap<>();
     Set<Tuple<Integer, Integer>> obstaclesPositionSuccesfull = new HashSet<>();
 
     public Integer t1(String arginputs) {
@@ -34,14 +35,15 @@ public class D6 {
 
         HashSet<Tuple<Integer, Integer>> visitedPoints = new HashSet<>();
         visitedPointsMinusGuardInitialPosition(guardPosition, visitedPoints);
-
+AtomicInteger i = new AtomicInteger();
         visitedPoints.forEach(obstaclePosition-> {
             resetMap(map, mapOriginal);
             String previouslyInThatPoint = map[obstaclePosition._1()][obstaclePosition._2()];
             map[obstaclePosition._1()][obstaclePosition._2()]="O";
             searchForLoops(obstaclePosition, guardPosition, map);
             map[obstaclePosition._1()][obstaclePosition._2()]=previouslyInThatPoint;
-//            System.out.println(i+" *****");
+            i.getAndIncrement();
+            System.out.println("obstacle assertion: "+i.get()+ " : " + obstaclePosition);
         });
         return obstaclesPositionSuccesfull.size();
     }
@@ -63,23 +65,29 @@ public class D6 {
 
     private void searchForLoops(Tuple<Integer, Integer> obstaclePositionCheck, Tuple<Integer, Integer> proposedMove, String[][] map) {
         int i = 0;
-        while(proposedMove !=null && i <100000){
+        int maxLoops = 100000;
+        while(proposedMove !=null && i <maxLoops){
             i++;
-            if(visitedWithCountTest.get(proposedMove)==null){
-                visitedWithCountTest.put(proposedMove, 1);
+            if(positionAlreadyVisited.get(proposedMove)==null){
+                positionAlreadyVisited.put(proposedMove, 1);
             }else{
-                int val = visitedWithCountTest.get(proposedMove)+1;
-                visitedWithCountTest.put(proposedMove, val);
-                if (val>100){
+                int val = positionAlreadyVisited.get(proposedMove)+1;
+                positionAlreadyVisited.put(proposedMove, val);
+                if (val>100 || i > maxLoops-3 || positionAlreadyVisited.values().stream().filter(occurence-> occurence>10).toList().size()>10){
                     obstaclesPositionSuccesfull.add(obstaclePositionCheck);
-                    visitedWithCountTest.clear();
-                    System.out.println("loop found "+ val + " : " + obstaclePositionCheck);
+                    positionAlreadyVisited = new HashMap<>();
+                    System.out.println("loop found "+ val + " : " + obstaclePositionCheck + " found obstacles causing loops:  "+ obstaclesPositionSuccesfull.size());
                     return;
                 }
             }
             proposedMove = move(map, proposedMove);
+            if (null==proposedMove){
+                System.out.println("exited for : " + obstaclePositionCheck + " found obstacles causing loops:  "+ obstaclesPositionSuccesfull.size());
+
+
+            }
         }
-        System.out.println("asserting position obstacle "+ i + " : " + obstaclePositionCheck);
+//        System.out.println("asserting position obstacle "+ i + " : " + obstaclePositionCheck);
     }
 
     Tuple<Integer, Integer> findGuard(String[][] map) {
