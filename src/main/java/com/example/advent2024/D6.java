@@ -1,25 +1,65 @@
 package com.example.advent2024;
 
 
-import org.yaml.snakeyaml.util.Tuple;
 
-import java.util.Objects;
+import java.util.*;
+
+import com.example.advent2024.collection.Tuple;
 
 public class D6 {
 
+    Set<Tuple<Integer, Integer>> visitedNodes = new HashSet<>();
+    Map<Tuple<Integer, Integer>, Integer> visitedWithCountTest = new HashMap();
+    Set<Tuple<Integer, Integer>> obstaclesPositionSuccesfull = new HashSet<>();
 
     public Integer t1(String arginputs) {
         int i = 0;
         Tuple<Integer, Integer> proposedMove;
         String[][] map = convertTo2dArray(arginputs);
-        Tuple<Integer, Integer> guardPosition = findGuard(map);
-        proposedMove = guardPosition;
-        while(proposedMove!=null && i<10000){
+        Tuple<Integer, Integer> guardInitPosition = findGuard(map);
+        proposedMove = guardInitPosition;
+        while(proposedMove!=null && i<1000000){
             i++;
             proposedMove = move(map, proposedMove);
             printResultCalculatemoves(map);
         }
+        System.out.println(i+" *****");
         return printResultCalculatemoves(map);
+    }
+
+    public Integer t2(String input) {
+
+        String[][] map = convertTo2dArray(input);
+        Tuple<Integer, Integer> guardPosition = findGuard(map);
+        visitedNodes.remove(guardPosition);
+        HashSet<Tuple<Integer, Integer>> visitedWithCountCopy = new HashSet<>(visitedNodes);
+
+        visitedWithCountCopy.forEach(obstacle-> {
+            map[obstacle._1()][obstacle._2()]="O";
+
+            int i = 0;
+            Tuple<Integer, Integer> proposedMove = guardPosition;
+            while(proposedMove!=null && i<10000){
+                i++;
+                if(visitedWithCountTest.get(proposedMove)==null){
+                    visitedWithCountTest.put(proposedMove, 1);
+                }else{
+                    int val = visitedWithCountTest.get(proposedMove)+1;
+                    visitedWithCountTest.put(proposedMove, val);
+                    if (val>3){
+                        obstaclesPositionSuccesfull.add(obstacle);
+                        visitedWithCountTest.clear();
+                        break;
+                    }
+                }
+
+                proposedMove = move(map, proposedMove);
+                printResultCalculatemoves(map);
+            }
+            System.out.println(i+" *****");
+        });
+
+        return obstaclesPositionSuccesfull.size();
     }
 
     Tuple<Integer, Integer> findGuard(String[][] map) {
@@ -43,14 +83,16 @@ public class D6 {
             for (int col = 0; col < map[row].length; col++) {
                 if (!Objects.equals(map[row][col], ".") && !Objects.equals(map[row][col], "#") ) {
                     moves++;
+                    visitedNodes.add(new Tuple(row, col) {
+                    });
                 }
-                System.out.print(map[row][col]+" ");
+//                System.out.print(map[row][col]+" ");
             }
 
-            System.out.println();
+//            System.out.println();
         }
-       System.out.println(" ==============================                            ");
-       System.out.println(" ==============================                            ");
+//       System.out.println(" ==============================                            ");
+//       System.out.println(" ==============================                            ");
         return moves;
     }
 
@@ -136,15 +178,15 @@ public class D6 {
             if (Objects.equals(directionIndicator, "<")) {
                 map[guardPosition._1()][guardPosition._2()]  = "^";
             }
-            
-            
+
+
         }
 
 return guardPosition;
     }
 
     private boolean checkObstaclePresent(String[][] map, Tuple<Integer, Integer> newPosition) {
-        return Objects.equals(map[newPosition._1()][newPosition._2()], "#");
+        return Objects.equals(map[newPosition._1()][newPosition._2()], "#")||Objects.equals(map[newPosition._1()][newPosition._2()], "O");
     }
 
 
