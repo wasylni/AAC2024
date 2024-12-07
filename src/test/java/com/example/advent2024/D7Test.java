@@ -13,6 +13,12 @@ class D7Test {
         Assertions.assertEquals(3749, result);
     }
 
+    @Test
+    void t2() {
+        Long result = new D7().t2(inputTest);
+        Assertions.assertEquals(11387, result);
+    }
+
     String inputTest = "" +
             "190: 10 19\n" +
             "3267: 81 40 27\n" +

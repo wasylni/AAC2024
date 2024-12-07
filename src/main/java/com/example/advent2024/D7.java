@@ -33,6 +33,70 @@ public class D7 {
         return addUp.get();
     }
 
+    public Long t2(String arginputs) {
+        AtomicLong addUp = new AtomicLong();
+        AtomicLong addJoinUp = new AtomicLong();
+
+        Tuple<Long, Long> proposedMove;
+        List<Map.Entry<Long, List<Long>>> numbersRawData = convertData(arginputs);
+
+        numbersRawData.forEach(entry ->{
+            Long sum = entry.getKey();
+            List<String> equations = generateEquations(entry.getValue());
+
+            // Evaluate and print each equation and its result
+            for (String equation : equations) {
+                long result = evaluateEquation(equation);
+                if(result == sum){
+                    System.out.println(equation + " = " + result + "matches sum: "+sum);
+                    addUp.set(addUp.get() + result);
+                    return;
+                }else{
+                    if(!findExpressions(entry.getValue(),sum).isEmpty()){
+                        addJoinUp.getAndAdd(sum);
+                    }
+                }
+            }
+
+        });
+
+        return addUp.addAndGet(addJoinUp.get());
+    }
+
+    // Method to find all expressions that evaluate to the target sum
+    public static List<String> findExpressions(List<Long> numbers, long targetSum) {
+        List<String> results = new ArrayList<>();
+        backtrack(numbers, 0, numbers.get(0), "" + numbers.get(0), targetSum, results);
+        return results;
+    }
+
+    // Backtracking helper method
+    private static void backtrack(List<Long> numbers, int index, long currentValue, String expression, long targetSum, List<String> results) {
+        // Base case: If we've used all numbers, check if the result matches the target
+        if (index == numbers.size() - 1) {
+            if (currentValue == targetSum) {
+                results.add(expression);
+            }
+            return;
+        }
+
+        // Get the next number
+        long nextNumber = numbers.get(index + 1);
+
+        // Option 1: Use "+" operator
+        backtrack(numbers, index + 1, currentValue + nextNumber, expression + " + " + nextNumber, targetSum, results);
+
+        // Option 2: Use "*" operator
+        backtrack(numbers, index + 1, currentValue * nextNumber, expression + " * " + nextNumber, targetSum, results);
+
+        // Option 3: Use "||" operator to concatenate
+        String concatenated = "" + currentValue + nextNumber; // Concatenate numbers as a string
+        long concatenatedValue = Long.parseLong(concatenated); // Convert concatenated string to Long
+        backtrack(numbers, index + 1, concatenatedValue, expression + " || " + nextNumber, targetSum, results);
+    }
+
+
+
 
 
     // Generate all equations using the numbers and +, * operators
