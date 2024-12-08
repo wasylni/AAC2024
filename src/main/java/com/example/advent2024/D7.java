@@ -15,7 +15,7 @@ public class D7 {
 
         numbersRawData.forEach(entry ->{
             Long sum = entry.getKey();
-            List<String> equations = generateEquations(entry.getValue());
+            List<String> equations = generateEquationsWithJoin(entry.getValue(), "||");
 
             // Evaluate and print each equation and its result
             for (String equation : equations) {
@@ -33,16 +33,18 @@ public class D7 {
         return addUp.get();
     }
 
+
+
     public Long t2(String arginputs) {
         AtomicLong addUp = new AtomicLong();
-        AtomicLong addJoinUp = new AtomicLong();
-
         Tuple<Long, Long> proposedMove;
         List<Map.Entry<Long, List<Long>>> numbersRawData = convertData(arginputs);
+        List<Map.Entry<Long, List<Long>>> onesNotFound = convertData(arginputs);
+        Set<Long> exclude = new HashSet<>();
 
         numbersRawData.forEach(entry ->{
             Long sum = entry.getKey();
-            List<String> equations = generateEquations(entry.getValue());
+            List<String> equations = generateEquationsWithJoin(entry.getValue(),null);
 
             // Evaluate and print each equation and its result
             for (String equation : equations) {
@@ -50,29 +52,39 @@ public class D7 {
                 if(result == sum){
                     System.out.println(equation + " = " + result + "matches sum: "+sum);
                     addUp.set(addUp.get() + result);
+                    exclude.add(sum);
                     return;
-                }else{
-                    if(!findExpressions(entry.getValue(),sum).isEmpty()){
-                        addJoinUp.getAndAdd(sum);
-                    }
                 }
             }
-
+        });
+        numbersRawData.forEach(number-> {
+            if(!exclude.contains(number.getKey())){
+                onesNotFound.add(number);
+            }
         });
 
-        return addUp.addAndGet(addJoinUp.get());
+
+
+
+
+
+
+
+
+
+        return addUp.get();
     }
 
-    // Method to find all expressions that evaluate to the target sum
+
+
+
     public static List<String> findExpressions(List<Long> numbers, long targetSum) {
         List<String> results = new ArrayList<>();
         backtrack(numbers, 0, numbers.get(0), "" + numbers.get(0), targetSum, results);
         return results;
     }
 
-    // Backtracking helper method
     private static void backtrack(List<Long> numbers, int index, long currentValue, String expression, long targetSum, List<String> results) {
-        // Base case: If we've used all numbers, check if the result matches the target
         if (index == numbers.size() - 1) {
             if (currentValue == targetSum) {
                 results.add(expression);
@@ -80,7 +92,6 @@ public class D7 {
             return;
         }
 
-        // Get the next number
         long nextNumber = numbers.get(index + 1);
 
         // Option 1: Use "+" operator
@@ -90,36 +101,43 @@ public class D7 {
         backtrack(numbers, index + 1, currentValue * nextNumber, expression + " * " + nextNumber, targetSum, results);
 
         // Option 3: Use "||" operator to concatenate
-        String concatenated = "" + currentValue + nextNumber; // Concatenate numbers as a string
-        long concatenatedValue = Long.parseLong(concatenated); // Convert concatenated string to Long
+        String concatenated = "" + currentValue + nextNumber;
+        long concatenatedValue = Long.parseLong(concatenated);
         backtrack(numbers, index + 1, concatenatedValue, expression + " || " + nextNumber, targetSum, results);
     }
 
 
-
-
-
-    // Generate all equations using the numbers and +, * operators
-    private static List<String> generateEquations(List<Long> numbers) {
+    // Generate all equations using the numbers and +, *, || operators
+    private static List<String> generateEquationsWithJoin(List<Long> numbers, String excludeOperator) {
         List<String> equations = new ArrayList<>();
         int n = numbers.size();
 
-        // There are 2^(n-1) combinations of operators for n numbers
-        int combinations = 1 << (n - 1); // 2^(n-1)
+        // There are 3^(n-1) combinations of operators for n numbers
+        int combinations = (int) Math.pow(3, n - 1);
 
         // Iterate over all combinations
         for (int i = 0; i < combinations; i++) {
             StringBuilder equation = new StringBuilder();
+            int temp = i;
 
             // Build the equation based on the current combination of operators
             for (int j = 0; j < n; j++) {
                 equation.append(numbers.get(j)); // Append the number
                 if (j < n - 1) {
-                    // Decide the operator based on the bit in `i`
-                    if ((i & (1 << j)) != 0) {
-                        equation.append("*");
-                    } else {
-                        equation.append("+");
+                    // Decide the operator based on the ternary representation of `i`
+                    int operator = temp % 3;
+                    temp /= 3;
+
+                    switch (operator) {
+                        case 0:
+                            equation.append("+");
+                            break;
+                        case 1:
+                            equation.append("*");
+                            break;
+                        case 2:
+                            equation.append("||");
+                            break;
                     }
                 }
             }
@@ -128,8 +146,9 @@ public class D7 {
             equations.add(equation.toString());
         }
 
-        return equations;
+        return excludeOperator==null?equations: equations.stream().filter(op-> !op.contains(excludeOperator)).toList();
     }
+
 
     // Evaluate a mathematical equation in string form
     private static long evaluateEquation(String equation) {
