@@ -15,7 +15,7 @@ class D7Test {
 
     @Test
     void t2() {
-        Long result = new D7().t2(inputTest);
+        Long result = new D7().t2(inputReal);
         Assertions.assertEquals(11387, result);
     }
 

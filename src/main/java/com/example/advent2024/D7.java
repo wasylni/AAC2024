@@ -5,6 +5,7 @@ import com.example.advent2024.collection.Tuple;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class D7 {
 
@@ -13,15 +14,15 @@ public class D7 {
         Tuple<Long, Long> proposedMove;
         List<Map.Entry<Long, List<Long>>> numbersRawData = convertData(arginputs);
 
-        numbersRawData.forEach(entry ->{
+        numbersRawData.forEach(entry -> {
             Long sum = entry.getKey();
             List<String> equations = generateEquationsWithJoin(entry.getValue(), "||");
 
             // Evaluate and print each equation and its result
             for (String equation : equations) {
                 long result = evaluateEquation(equation);
-                if(result == sum){
-                    System.out.println(equation + " = " + result + "matches sum: "+sum);
+                if (result == sum) {
+//                    System.out.println(equation + " = " + result + "matches sum: " + sum);
                     addUp.set(addUp.get() + result);
                     return;
 
@@ -32,50 +33,56 @@ public class D7 {
 
         return addUp.get();
     }
-
 
 
     public Long t2(String arginputs) {
         AtomicLong addUp = new AtomicLong();
-        Tuple<Long, Long> proposedMove;
         List<Map.Entry<Long, List<Long>>> numbersRawData = convertData(arginputs);
-        List<Map.Entry<Long, List<Long>>> onesNotFound = convertData(arginputs);
-        Set<Long> exclude = new HashSet<>();
+        List<Map.Entry<Long, List<Long>>> onesNotFound = new ArrayList<>();
+        Set<Long> foundSums = new HashSet<>();
 
-        numbersRawData.forEach(entry ->{
+        numbersRawData.forEach(entry -> {
             Long sum = entry.getKey();
-            List<String> equations = generateEquationsWithJoin(entry.getValue(),null);
+            List<String> equations = generateEquationsWithJoin(entry.getValue(), "||");
 
             // Evaluate and print each equation and its result
             for (String equation : equations) {
                 long result = evaluateEquation(equation);
-                if(result == sum){
-                    System.out.println(equation + " = " + result + "matches sum: "+sum);
+                if (result == sum) {
+//                    System.out.println(equation + " = " + result + "matches sum: " + sum);
                     addUp.set(addUp.get() + result);
-                    exclude.add(sum);
+                    foundSums.add(sum);
                     return;
                 }
             }
         });
-        numbersRawData.forEach(number-> {
-            if(!exclude.contains(number.getKey())){
+
+//======
+        numbersRawData.forEach(number -> {
+            if (!foundSums.contains(number.getKey())) {
                 onesNotFound.add(number);
             }
         });
 
+        onesNotFound.forEach(entry -> {
+            Long sum = entry.getKey();
+            List<String> equations = generateEquationsWithJoin(entry.getValue(), null).stream().filter(equasion -> equasion.contains("||")).collect(Collectors.toUnmodifiableList());
 
-
-
-
-
-
-
+            // Evaluate and print each equation and its result
+            for (String equation : equations) {
+                long result = evaluateEquationWithJoin(equation);
+                if (result == sum) {
+                    System.out.println(equation + " = " + result + "matches sum: " + sum);
+                    addUp.set(addUp.get() + result);
+                    foundSums.add(sum);
+                    return;
+                }
+            }
+        });
 
 
         return addUp.get();
     }
-
-
 
 
     public static List<String> findExpressions(List<Long> numbers, long targetSum) {
@@ -146,7 +153,7 @@ public class D7 {
             equations.add(equation.toString());
         }
 
-        return excludeOperator==null?equations: equations.stream().filter(op-> !op.contains(excludeOperator)).toList();
+        return excludeOperator == null ? equations : equations.stream().filter(op -> !op.contains(excludeOperator)).toList();
     }
 
 
@@ -169,6 +176,27 @@ public class D7 {
         return result;
     }
 
+
+    // Evaluate a mathematical equation in string form
+    private static long evaluateEquationWithJoin(String equation) {
+         String[] equations = equation.split("\\|\\|");
+        for (int i = 0; i < equations.length; i=i+1) {
+            if(i>0 && (equations[i].contains("+") || equations[i].contains("*"))){
+                equations[i] = equations[i-1].concat(equations[i]);
+                equations[i-1]="";
+            }
+            long result = evaluateEquation(equations[i]);
+
+            equations[i] = String.valueOf(result);
+        }
+
+        StringBuilder joinedResult= new StringBuilder();
+        for (int i = 0; i < equations.length; i=i+1) {
+            joinedResult.append(equations[i]);
+        }
+        return Long.parseLong(joinedResult.toString());
+    }
+
     private List<Map.Entry<Long, List<Long>>> convertData(String input) {
         List<Map.Entry<Long, List<Long>>> entries = new ArrayList<>();
         // Split the input string by new lines to get rows
@@ -181,19 +209,17 @@ public class D7 {
             String[] numbers = line[1].trim().split(" ");
 
             List<Long> numbersList = new ArrayList<>();
-            System.out.print("sum: "+ sum + " = ");
+//            System.out.print("sum: " + sum + " = ");
             for (String part : numbers) {
                 numbersList.add(Long.parseLong(part));
-                System.out.print(Long.parseLong(part)+" ");
+//                System.out.print(Long.parseLong(part) + " ");
             }
-            System.out.println();
+//            System.out.println();
             entries.add(new AbstractMap.SimpleEntry<>(sum, numbersList));
         }
 
         return entries;
     }
-
-
 
 
 }
