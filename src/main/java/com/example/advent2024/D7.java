@@ -72,10 +72,12 @@ public class D7 {
             for (String equation : equations) {
                 long result = evaluateEquationWithJoin(equation);
                 if (result == sum) {
-                    System.out.println(equation + " = " + result + "matches sum: " + sum);
+                    System.out.println(equation + " = " + result + " matches sum: " + sum);
                     addUp.set(addUp.get() + result);
                     foundSums.add(sum);
                     return;
+                } else {
+                    System.out.println(equation + " = " + result + " NOT matches sum: " + sum);
                 }
             }
         });
@@ -158,7 +160,7 @@ public class D7 {
 
 
     // Evaluate a mathematical equation in string form
-    private static long evaluateEquation(String equation) {
+    public static long evaluateEquation(String equation) {
         String[] tokens = equation.split("(?<=[+*])|(?=[+*])"); // Split numbers and operators
         long result = Long.parseLong(tokens[0]); // Initialize with the first number
 
@@ -178,20 +180,28 @@ public class D7 {
 
 
     // Evaluate a mathematical equation in string form
-    private static long evaluateEquationWithJoin(String equation) {
-         String[] equations = equation.split("\\|\\|");
-        for (int i = 0; i < equations.length; i=i+1) {
-            if(i>0 && (equations[i].contains("+") || equations[i].contains("*"))){
-                equations[i] = equations[i-1].concat(equations[i]);
-                equations[i-1]="";
-            }
-            long result = evaluateEquation(equations[i]);
+    public static long evaluateEquationWithJoin(String equation) {
+        String[] equations = equation.split("\\|\\|");
+        for (int i = 0; i < equations.length; i = i + 1) {
 
+            if (equations[i].contains("+") || equations[i].contains("*")) {
+                if (i - 1 >= 0 && !equations[i - 1].isEmpty() && (!equations[i - 1].contains("+") || !equations[i - 1].contains("*"))) {
+                    equations[i] = equations[i - 1].concat(equations[i]);
+                    equations[i - 1] = "";
+                }
+            } else {
+                if (i - 1 >= 0 && !equations[i - 1].isEmpty() && (!equations[i - 1].contains("+") || !equations[i - 1].contains("*"))) {
+                    equations[i] = equations[i - 1].concat(equations[i]);
+                    equations[i - 1] = "";
+                }
+            }
+
+            long result = evaluateEquation(equations[i]);
             equations[i] = String.valueOf(result);
         }
 
-        StringBuilder joinedResult= new StringBuilder();
-        for (int i = 0; i < equations.length; i=i+1) {
+        StringBuilder joinedResult = new StringBuilder();
+        for (int i = 0; i < equations.length; i = i + 1) {
             joinedResult.append(equations[i]);
         }
         return Long.parseLong(joinedResult.toString());
