@@ -11,7 +11,6 @@ public class D7 {
 
     public Long t1(String arginputs) {
         AtomicLong addUp = new AtomicLong();
-        Tuple<Long, Long> proposedMove;
         List<Map.Entry<Long, List<Long>>> numbersRawData = convertData(arginputs);
 
         numbersRawData.forEach(entry -> {
@@ -36,7 +35,7 @@ public class D7 {
 
 
     public Long t2(String arginputs) {
-        AtomicLong addUp = new AtomicLong();
+        AtomicLong addUp = new AtomicLong(0);
         List<Map.Entry<Long, List<Long>>> numbersRawData = convertData(arginputs);
         List<Map.Entry<Long, List<Long>>> onesNotFound = new ArrayList<>();
         Set<Long> foundSums = new HashSet<>();
@@ -77,7 +76,7 @@ public class D7 {
                     foundSums.add(sum);
                     return;
                 } else {
-                    System.out.println(equation + " = " + result + " NOT matches sum: " + sum);
+//                    System.out.println(equation + " = " + result + " NOT matches sum: " + sum);
                 }
             }
         });

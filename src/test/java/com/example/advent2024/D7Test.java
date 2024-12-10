@@ -9,8 +9,8 @@ class D7Test {
 
     @Test
     void t1() {
-        Long result = new D7().t1(inputTest);
-        Assertions.assertEquals(3749, result);
+        Long result = new D7().t1(inputReal);
+        Assertions.assertEquals(7885693428401l, result);
     }
 
     @Test
