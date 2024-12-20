@@ -1,16 +1,36 @@
 package com.example.advent2024;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class D20 {
 
-    public Integer t1(String arginputs) {
+    public Integer t1(String arginputs, int saving) {
         Tuple<Integer, Integer> proposedMove;
         String[][] map = convertTo2dArray(arginputs);
-        Set<List<Tuple<Integer, Integer>>> result = findAllPaths(map);
-        return result.size();
+        Set<List<Tuple<Integer, Integer>>> breakRules = findAllPaths(map, true);
+        Set<List<Tuple<Integer, Integer>>> respectRules = findAllPaths(map, false);
+        int shortestPathadhereToRules = findListWithFewestElements(respectRules).size()-1;
+        List<List<Tuple<Integer, Integer>>> filtered = breakRules.stream().filter(route -> route.size() < shortestPathadhereToRules).toList();
+        List<Integer> listOfReduced = new ArrayList<>();
+
+                filtered.stream().forEach(list-> {
+
+                    listOfReduced.add((shortestPathadhereToRules - list.size())+1);
+
+                });
+
+
+
+        return listOfReduced.stream().filter(i-> i>=saving).collect(Collectors.toUnmodifiableList()).size();
     }
 
+
+    public static <T> List<T> findListWithFewestElements(Set<List<T>> setOfLists) {
+        return setOfLists.stream()
+                .min(Comparator.comparingInt(List::size))
+                .orElse(null);
+    }
 
     public static class Tuple<T, U> {
         public final T first;
@@ -40,8 +60,7 @@ public class D20 {
             return "(" + first + ", " + second + ")";
         }
     }
-
-    public static Set<List<Tuple<Integer, Integer>>> findAllPaths(String[][] grid) {
+    public static Set<List<Tuple<Integer, Integer>>> findAllPaths(String[][] grid, boolean requireBreak) {
         int rows = grid.length;
         int cols = grid[0].length;
 
@@ -67,13 +86,14 @@ public class D20 {
         }
 
         Set<List<Tuple<Integer, Integer>>> resultPaths = new HashSet<>();
-        boolean[][] visited = new boolean[rows][cols];
+        // visited[row][col][usedBreak? 0 or 1]
+        boolean[][][] visited = new boolean[rows][cols][2];
 
         List<Tuple<Integer, Integer>> currentPath = new ArrayList<>();
         currentPath.add(new Tuple<>(startRow, startCol));
-        visited[startRow][startCol] = true;
+        visited[startRow][startCol][0] = true; // start with break not used
 
-        dfs(grid, startRow, startCol, endRow, endCol, visited, currentPath, resultPaths);
+        dfs(grid, startRow, startCol, endRow, endCol, visited, currentPath, resultPaths, false, requireBreak);
 
         return resultPaths;
     }
@@ -81,17 +101,23 @@ public class D20 {
     private static void dfs(String[][] grid,
                             int row, int col,
                             int endRow, int endCol,
-                            boolean[][] visited,
+                            boolean[][][] visited,
                             List<Tuple<Integer, Integer>> currentPath,
-                            Set<List<Tuple<Integer, Integer>>> resultPaths) {
+                            Set<List<Tuple<Integer, Integer>>> resultPaths,
+                            boolean usedBreak,
+                            boolean requireBreak) {
 
-        // If we reached E, add a copy of the current path to the results
+        // If we reached E, check if we match the requireBreak criteria
         if (row == endRow && col == endCol) {
-            resultPaths.add(new ArrayList<>(currentPath));
+            // If requireBreak is false, we want paths that never used the break (usedBreak == false)
+            // If requireBreak is true, we want paths that used the break (usedBreak == true)
+            if (usedBreak == requireBreak) {
+                resultPaths.add(new ArrayList<>(currentPath));
+            }
             return;
         }
 
-        // Possible movements: up, down, left, right
+        // Directions: up, down, left, right
         int[][] directions = {
                 {-1, 0}, // up
                 {1, 0},  // down
@@ -103,31 +129,54 @@ public class D20 {
             int newRow = row + dir[0];
             int newCol = col + dir[1];
 
-            if (isValidMove(grid, newRow, newCol, visited)) {
-                visited[newRow][newCol] = true;
+            if (isValidMove(grid, newRow, newCol, visited, usedBreak)) {
+                boolean newUsedBreak = usedBreak;
+                if (isHash(grid, newRow, newCol) && !usedBreak) {
+                    // We are using our single breach here
+                    newUsedBreak = true;
+                }
+
+                visited[newRow][newCol][newUsedBreak ? 1 : 0] = true;
                 currentPath.add(new Tuple<>(newRow, newCol));
 
-                dfs(grid, newRow, newCol, endRow, endCol, visited, currentPath, resultPaths);
+                dfs(grid, newRow, newCol, endRow, endCol, visited, currentPath, resultPaths, newUsedBreak, requireBreak);
 
                 // Backtrack
                 currentPath.remove(currentPath.size() - 1);
-                visited[newRow][newCol] = false;
+                visited[newRow][newCol][newUsedBreak ? 1 : 0] = false;
             }
         }
     }
 
-    private static boolean isValidMove(String[][] grid, int r, int c, boolean[][] visited) {
+    private static boolean isValidMove(String[][] grid, int r, int c, boolean[][][] visited, boolean usedBreak) {
         if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length) {
             return false;
         }
-        if (visited[r][c]) {
+
+        String cell = grid[r][c];
+        int stateIndex = usedBreak ? 1 : 0;
+        if (visited[r][c][stateIndex]) {
+            return false; // already visited in this state
+        }
+
+        // Allowed moves:
+        // - "." or "E" always allowed if not visited
+        // - "#" allowed only if we haven't used the break yet (usedBreak == false)
+        // - "S" should not be stepped on again after starting
+        if (".".equals(cell) || "E".equals(cell)) {
+            return true;
+        } else if ("#".equals(cell) && !usedBreak) {
+            return true;
+        } else if ("S".equals(cell)) {
             return false;
         }
-        String cell = grid[r][c];
-        // We can step onto "." or "E". Cannot step onto "#" or "S" again.
-        return (".".equals(cell) || "E".equals(cell));
+
+        return false;
     }
 
+    private static boolean isHash(String[][] grid, int r, int c) {
+        return "#".equals(grid[r][c]);
+    }
 
     private String[][] convertTo2dArray(String input) {
 
